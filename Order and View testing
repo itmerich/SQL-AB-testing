@@ -1,0 +1,73 @@
+-- ORDER 
+
+SELECT 
+  COUNT(DISTINCT CAST(final_assignments.item_id AS INT))     AS items,
+  test_assignment,
+  SUM(CASE WHEN (created_at > test_start_date AND
+                DATE_PART('day', created_at - test_start_date) <= 30)
+          THEN 1
+          ELSE 0
+          END) AS order_binary_30d
+FROM
+  dsv1069.final_assignments
+LEFT JOIN 
+  dsv1069.orders
+ON 
+ final_assignments.item_id = orders.item_id 
+WHERE 
+    test_number = 'item_test_2'
+GROUP BY
+  test_assignment
+  
+-- The lift for the orders was 1.1%. The p-value was 0.85, meaning the results are not statistically significant
+-- and we cannot conclude a difference between the two groups. We would need a higher number of trails to do this.
+
+
+-- VIEWS 
+
+SELECT 
+  test_assignment,
+  COUNT(DISTINCT name_id)     AS items,
+  SUM(view_binary_30d)        AS num_views_30d,
+  AVG(view_binary_30d)        AS avg_30d,
+  STDDEV(view_binary_30d)     AS std_30d
+FROM 
+(
+  SELECT 
+    test_assignment,
+    name_id,
+    MAX(CASE WHEN (inner_view.event_time > final_assignments.test_start_date AND 
+                DATE_PART('day', inner_view.event_time - final_assignments.test_start_date) <=30)
+        THEN 1
+        ELSE 0
+        END) As view_binary_30d
+  FROM 
+    (
+    SELECT 
+      event_time,
+      event_name,
+      MAX(CASE WHEN parameter_name = 'item_id'
+              THEN CAST(parameter_value AS INT)
+              ELSE NULL 
+              END) AS name_id
+    FROM 
+     dsv1069.events
+    GROUP BY 
+      event_time,
+      event_name
+   ) inner_view
+  LEFT JOIN
+    dsv1069.final_assignments 
+  ON 
+    inner_view.name_id = final_assignments.item_id
+  WHERE 
+  test_number = 'item_test_2' 
+  GROUP BY 
+    name_id,
+    test_assignment
+) outer_view
+GROUP BY
+  test_assignment
+  
+-- The lift for the item view test was 2.6%. The p-value was 0.20, meaning the results are not statistically significant 
+-- and we cannot conclude a difference between the two groups. We would need a higher number of trails to do this

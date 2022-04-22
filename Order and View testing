@@ -1,5 +1,5 @@
 -- ORDER 
-
+'''
 SELECT 
   COUNT(DISTINCT CAST(final_assignments.item_id AS INT))     AS items,
   test_assignment,
@@ -18,13 +18,13 @@ WHERE
     test_number = 'item_test_2'
 GROUP BY
   test_assignment
-  
+''' 
 -- The lift for the orders was 1.1%. The p-value was 0.85, meaning the results are not statistically significant
 -- and we cannot conclude a difference between the two groups. We would need a higher number of trails to do this.
 
 
 -- VIEWS 
-
+'''
 SELECT 
   test_assignment,
   COUNT(DISTINCT name_id)     AS items,
@@ -68,6 +68,6 @@ FROM
 ) outer_view
 GROUP BY
   test_assignment
-  
+'''  
 -- The lift for the item view test was 2.6%. The p-value was 0.20, meaning the results are not statistically significant 
 -- and we cannot conclude a difference between the two groups. We would need a higher number of trails to do this

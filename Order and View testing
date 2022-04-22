@@ -55,7 +55,7 @@ FROM
     GROUP BY 
       event_time,
       event_name
-   ) inner_view
+     ) inner_view
   LEFT JOIN
     dsv1069.final_assignments 
   ON 
